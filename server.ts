@@ -150,6 +150,50 @@ OUTPUT REQUIREMENTS:
 - If language requested is 'hi' (Hindi), provide natural conversational Hindi (Devanagari). If 'hinglish', provide Roman Hindi. If 'en', clear English.
 `;
 
+// Helper function to call NVIDIA NIM API if NVIDIA_API_KEY is configured
+async function analyzeWithNvidia(promptText: string): Promise<any | null> {
+  const nvidiaKey = process.env.NVIDIA_API_KEY;
+  if (!nvidiaKey || nvidiaKey === 'MY_NVIDIA_API_KEY') {
+    return null;
+  }
+
+  const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${nvidiaKey}`,
+    },
+    body: JSON.stringify({
+      model: 'meta/llama-3.3-70b-instruct',
+      messages: [
+        {
+          role: 'system',
+          content: `${SCAM_ANALYSIS_SYSTEM_PROMPT}\nIMPORTANT: Respond ONLY with valid, parseable JSON matching the requested structure without any markdown formatting.`,
+        },
+        {
+          role: 'user',
+          content: promptText,
+        },
+      ],
+      temperature: 0.2,
+      max_tokens: 2000,
+    }),
+  });
+
+  if (!response.ok) {
+    const errBody = await response.text();
+    console.warn(`NVIDIA NIM returned ${response.status}: ${errBody}, falling back to Gemini...`);
+    return null;
+  }
+
+  const jsonResponse = await response.json();
+  const content = jsonResponse.choices?.[0]?.message?.content;
+  if (!content) return null;
+
+  const cleaned = content.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/\s*```$/, '').trim();
+  return JSON.parse(cleaned);
+}
+
 // Analysis Endpoint
 app.post('/api/analyze', async (req: Request, res: Response) => {
   try {
@@ -190,103 +234,120 @@ Carefully detect:
 10. Multilingual explanation in ${language}.
 `;
 
-    const contentsPayload: any[] = [];
+    let parsedData: any = null;
 
-    // If screenshot or QR image is attached, provide it as inlineData part
-    if (imageData && typeof imageData === 'string') {
-      const match = imageData.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
-      if (match) {
-        const mimeType = match[1];
-        const base64Data = match[2];
-        contentsPayload.push({
-          inlineData: {
-            mimeType,
-            data: base64Data,
-          },
-        });
+    // If NVIDIA_API_KEY is configured and no image is attached, try NVIDIA NIM first
+    if (!imageData && process.env.NVIDIA_API_KEY && process.env.NVIDIA_API_KEY !== 'MY_NVIDIA_API_KEY') {
+      try {
+        parsedData = await analyzeWithNvidia(promptText);
+        if (parsedData) {
+          console.log('⚡ Analyzed using NVIDIA NIM API');
+        }
+      } catch (nvidiaErr) {
+        console.warn('NVIDIA NIM attempt failed, using Gemini 3.8 Flash fallback:', nvidiaErr);
       }
     }
 
-    contentsPayload.push({
-      text: promptText,
-    });
+    // Default & Multimodal Vision Engine: Gemini 3.8 Flash
+    if (!parsedData) {
+      const contentsPayload: any[] = [];
 
-    // Call Gemini 3.8 Flash using server-side SDK
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
-      contents: contentsPayload,
-      config: {
-        systemInstruction: SCAM_ANALYSIS_SYSTEM_PROMPT,
-        temperature: 0.2, // Low temperature for consistent risk assessment
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            risk_score: { type: Type.INTEGER, description: 'Score between 0 and 100' },
-            risk_level: { type: Type.STRING, description: 'LOW, MODERATE, HIGH, or CRITICAL' },
-            category: { type: Type.STRING, description: 'Scam category name' },
-            summary: { type: Type.STRING, description: '1-2 sentence plain language verdict' },
-            multilingual_summary: { type: Type.STRING, description: 'Summary in requested user language' },
-            confidence_score: { type: Type.INTEGER, description: 'Confidence in analysis 0-100' },
-            why_suspicious: {
-              type: Type.ARRAY,
-              items: {
+      // If screenshot or QR image is attached, provide it as inlineData part
+      if (imageData && typeof imageData === 'string') {
+        const match = imageData.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
+        if (match) {
+          const mimeType = match[1];
+          const base64Data = match[2];
+          contentsPayload.push({
+            inlineData: {
+              mimeType,
+              data: base64Data,
+            },
+          });
+        }
+      }
+
+      contentsPayload.push({
+        text: promptText,
+      });
+
+      // Call Gemini 3.8 Flash using server-side SDK
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.8-flash',
+        contents: contentsPayload,
+        config: {
+          systemInstruction: SCAM_ANALYSIS_SYSTEM_PROMPT,
+          temperature: 0.2, // Low temperature for consistent risk assessment
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              risk_score: { type: Type.INTEGER, description: 'Score between 0 and 100' },
+              risk_level: { type: Type.STRING, description: 'LOW, MODERATE, HIGH, or CRITICAL' },
+              category: { type: Type.STRING, description: 'Scam category name' },
+              summary: { type: Type.STRING, description: '1-2 sentence plain language verdict' },
+              multilingual_summary: { type: Type.STRING, description: 'Summary in requested user language' },
+              confidence_score: { type: Type.INTEGER, description: 'Confidence in analysis 0-100' },
+              why_suspicious: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    signal: { type: Type.STRING },
+                    severity: { type: Type.STRING, description: 'critical, high, medium, or low' },
+                    detail: { type: Type.STRING },
+                  },
+                  required: ['signal', 'severity', 'detail'],
+                },
+              },
+              do_not: {
+                type: Type.ARRAY,
+                items: { type: Type.STRING },
+              },
+              recommended_actions: {
+                type: Type.ARRAY,
+                items: { type: Type.STRING },
+              },
+              how_to_verify: {
+                type: Type.STRING,
+              },
+              extracted_entities: {
                 type: Type.OBJECT,
                 properties: {
-                  signal: { type: Type.STRING },
-                  severity: { type: Type.STRING, description: 'critical, high, medium, or low' },
-                  detail: { type: Type.STRING },
+                  phone_numbers: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  urls: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  upi_ids: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  organizations_mentioned: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  apps_requested: { type: Type.ARRAY, items: { type: Type.STRING } },
                 },
-                required: ['signal', 'severity', 'detail'],
+              },
+              emergency_contact: {
+                type: Type.OBJECT,
+                properties: {
+                  helpline: { type: Type.STRING },
+                  portal: { type: Type.STRING },
+                  instruction: { type: Type.STRING },
+                },
               },
             },
-            do_not: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING },
-            },
-            recommended_actions: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING },
-            },
-            how_to_verify: {
-              type: Type.STRING,
-            },
-            extracted_entities: {
-              type: Type.OBJECT,
-              properties: {
-                phone_numbers: { type: Type.ARRAY, items: { type: Type.STRING } },
-                urls: { type: Type.ARRAY, items: { type: Type.STRING } },
-                upi_ids: { type: Type.ARRAY, items: { type: Type.STRING } },
-                organizations_mentioned: { type: Type.ARRAY, items: { type: Type.STRING } },
-                apps_requested: { type: Type.ARRAY, items: { type: Type.STRING } },
-              },
-            },
-            emergency_contact: {
-              type: Type.OBJECT,
-              properties: {
-                helpline: { type: Type.STRING },
-                portal: { type: Type.STRING },
-                instruction: { type: Type.STRING },
-              },
-            },
+            required: [
+              'risk_score',
+              'risk_level',
+              'category',
+              'summary',
+              'multilingual_summary',
+              'why_suspicious',
+              'do_not',
+              'recommended_actions',
+              'how_to_verify',
+            ],
           },
-          required: [
-            'risk_score',
-            'risk_level',
-            'category',
-            'summary',
-            'multilingual_summary',
-            'why_suspicious',
-            'do_not',
-            'recommended_actions',
-            'how_to_verify',
-          ],
         },
-      },
-    });
+      });
 
-    const responseText = response.text || '{}';
-    const parsedData = JSON.parse(responseText);
+      const responseText = response.text || '{}';
+      parsedData = JSON.parse(responseText);
+    }
 
     // Ensure fallback safety if fields are missing
     const sanitizedResult = {
