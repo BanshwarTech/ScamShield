@@ -1,0 +1,216 @@
+export interface ScamGuide {
+  id: string;
+  title: string;
+  titleHindi: string;
+  category: string;
+  badge: string;
+  icon: string;
+  summary: string;
+  summaryHindi: string;
+  modusOperandi: string[];
+  redFlags: string[];
+  goldenRule: string;
+  goldenRuleHindi: string;
+  safeAction: string;
+}
+
+export const scamKnowledgeBase: ScamGuide[] = [
+  {
+    id: 'upi-pin-fraud',
+    title: 'UPI PIN & "Scan QR to Receive Money" Fraud',
+    titleHindi: 'UPI PIN और "पैसे पाने के लिए QR स्कैन करें" फ्रॉड',
+    category: 'UPI & Payment',
+    badge: '#1 Most Common in India',
+    icon: 'credit-card',
+    summary: 'Scammers on OLX, Facebook Marketplace, or pretending to be army officers send a QR code or UPI collect request claiming it will credit money into your bank account.',
+    summaryHindi: 'ठग OLX या सोशल मीडिया पर खरीदार बनकर QR कोड भेजते हैं और कहते हैं कि इसे स्कैन करने या PIN डालने पर आपके खाते में पैसे आ जाएंगे।',
+    modusOperandi: [
+      'Scammer poses as buyer for furniture, electronics, or vehicle you posted online.',
+      'Claims they are an Army/CISF officer and cannot meet in person.',
+      'Sends a screenshot of a QR code or sends a UPI collect request (PhonePe/GPay/Paytm).',
+      'Tells you: "Scan this and enter your UPI PIN to approve deposit of ₹15,000 into your account".',
+    ],
+    redFlags: [
+      'Anyone asking you to scan a QR code to RECEIVE money.',
+      'Any prompt asking for UPI PIN when expecting incoming payment.',
+      'Collect requests disguised as "Refund_Approved_Rs5000" or "Cashback_Credit".',
+    ],
+    goldenRule: 'UPI PIN is ONLY entered to DEBIT money from your bank account. You NEVER need a PIN to receive money.',
+    goldenRuleHindi: 'UPI PIN केवल पैसे काटने (भेजने) के लिए डाला जाता है। पैसे प्राप्त करने के लिए कभी भी PIN की आवश्यकता नहीं होती।',
+    safeAction: 'Decline the collect request immediately and block the contact. Never enter PIN or tap approve.',
+  },
+  {
+    id: 'digital-arrest',
+    title: 'Fake "Digital Arrest" & Police/CBI Impersonation',
+    titleHindi: 'फर्जी "डिजिटल अरेस्ट" व पुलिस/CBI बनकर ब्लैकमेल',
+    category: 'Extortion & Impersonation',
+    badge: 'High Severity Threat',
+    icon: 'shield-alert',
+    summary: 'Scammers impersonate Telecom Dept (DoT), Police, Customs, or CBI claiming an illegal parcel with drugs/passports has been detected in your name and place you under fake "video digital arrest".',
+    summaryHindi: 'ठग पुलिस या कस्टम अधिकारी बनकर कॉल करते हैं और कहते हैं कि आपके नाम से नशीले पदार्थों का पार्सल पकड़ा गया है, फिर स्काइप या वॉट्सऐप पर फर्जी अरेस्ट दिखाते हैं।',
+    modusOperandi: [
+      'IVR call says "Your mobile number / SIM will be blocked within 2 hours by TRAI".',
+      'Transfers call to a fake "Cyber Cell Inspector" dressed in fake police uniform in front of a mock backdrop.',
+      'Threatens that a parcel sent to Taiwan or Cambodia contains MDMA drugs or fake passports with your Aadhaar card.',
+      'Forces victim to stay on continuous Skype/WhatsApp video call for hours (calling it "Digital Arrest").',
+      'Demands transferring all savings to a "Secret Reserve Bank Verification Account" for asset verification.',
+    ],
+    redFlags: [
+      'Indian law DOES NOT recognize or allow any concept called "Digital Arrest".',
+      'Police or CBI never conduct interrogations or issue arrest warrants over WhatsApp/Skype video.',
+      'Demands to transfer your bank balance to private accounts for "court clearance" or "RBI audit".',
+    ],
+    goldenRule: 'Real police will never arrest or interrogate you on video calls, nor will they ask you to deposit money into any account.',
+    goldenRuleHindi: 'असली पुलिस कभी भी वीडियो कॉल पर पूछताछ या गिरफ्तारी नहीं करती और न ही किसी खाते में पैसे ट्रांसफर करने को कहती है।',
+    safeAction: 'Disconnect the video call immediately. Dial 1930 or visit your local police station.',
+  },
+  {
+    id: 'bank-kyc-apk',
+    title: 'Bank KYC Expiry & Malicious APK Phishing',
+    titleHindi: 'बैंक KYC समाप्ति व फर्जी APK मैलवेयर फ्रॉड',
+    category: 'Phishing & Malware',
+    badge: 'Widespread SMS Scam',
+    icon: 'smartphone',
+    summary: 'SMS claiming your SBI, HDFC, or PNB account/card is blocked today due to pending PAN/Aadhaar update. Urges you to download an app or visit a malicious link.',
+    summaryHindi: 'SMS आता है कि आपका बैंक खाता आज ब्लॉक हो जाएगा और तुरंत PAN लिंक करने के लिए दिए गए लिंक से APK ऐप डाउनलोड करें।',
+    modusOperandi: [
+      'Victim receives SMS: "Dear customer your SBI account will be blocked today. Update your PAN immediately: bit.ly/sbi-pan-update".',
+      'Link prompts user to download an APK file (e.g. `SBI_Rewards.apk` or `YONO_KYC_Update.apk`).',
+      'The APK asks for SMS permissions (allowing it to secretly intercept all bank OTPs) and accessibility permissions.',
+      'Criminals login to victim internet banking and drain accounts while suppressing SMS alerts.',
+    ],
+    redFlags: [
+      'SMS sent from a standard 10-digit mobile number (+91-9xxxx) instead of official bank header (e.g. AD-SBIINB).',
+      'Urgent threats of immediate account deactivation within 24 hours.',
+      'Instructions to install an `.apk` file from a website or Google Drive instead of Google Play Store.',
+    ],
+    goldenRule: 'Banks never send direct links or APK files to update KYC. Only update KYC physically at a branch or inside the official banking app.',
+    goldenRuleHindi: 'बैंक कभी भी KYC अपडेट के लिए SMS में लिंक या APK फाइल नहीं भेजते। हमेशा बैंक की आधिकारिक ऐप खोलें।',
+    safeAction: 'Do not click the link or download any file. Open your banking app independently to check account health.',
+  },
+  {
+    id: 'electricity-bill-cutoff',
+    title: 'Electricity Bill Disconnection Threat',
+    titleHindi: 'बिजली कनेक्शन काटने की धमकी भरा SMS',
+    category: 'Utility Fraud',
+    badge: 'Panic Inducing Scam',
+    icon: 'zap',
+    summary: 'Fake messages claiming your electricity power will be disconnected at 9:30 PM tonight due to unpaid previous month bill. Directs you to call an "electricity officer".',
+    summaryHindi: 'मैसेज आता है कि आपका पिछला बिजली बिल अपडेट नहीं हुआ है और आज रात बिजली काट दी जाएगी, तुरंत दिए गए नंबर पर कॉल करें।',
+    modusOperandi: [
+      'Message sent during evening hours: "Dear consumer, your electricity power will be disconnected at 9:30 PM tonight from electricity office. Please immediately contact our officer at 98xxxxxxx".',
+      'When called, the imposter says "system didn’t record your ₹10 payment, please pay ₹10 recharge using this link to update status".',
+      'The link opens a phishing portal or asks victim to install a screen-sharing app like AnyDesk.',
+      'The fraudster steals credentials and drains the bank account.',
+    ],
+    redFlags: [
+      'No consumer number, meter ID, or state discom name (BESCOM, MSEDCL, TPDDL) mentioned.',
+      'Personal 10-digit phone number provided to call.',
+      'Arbitrary urgent deadline (e.g. 9:30 PM tonight) to induce panic.',
+    ],
+    goldenRule: 'Discoms give written physical notices and never threaten same-night disconnection via personal SMS.',
+    goldenRuleHindi: 'बिजली बोर्ड व्यक्तिगत मोबाइल नंबर से रात में कनेक्शन काटने की धमकी कभी नहीं भेजते।',
+    safeAction: 'Check your electricity bill directly on your official state discom app or payment portal (e.g. BESCOM/Tata Power/UPPCL).',
+  },
+  {
+    id: 'part-time-task-scam',
+    title: 'Part-Time Telegram "YouTube Like" & Rating Scam',
+    titleHindi: 'टेलीग्राम पार्ट-टाइम जॉब व "यूट्यूब लाइक" फ्रॉड',
+    category: 'Employment & Task Fraud',
+    badge: 'Targeting Youth & Homemakers',
+    icon: 'briefcase',
+    summary: 'Job offers on WhatsApp/Telegram promising ₹3,000 to ₹8,000 per day for simple tasks like liking videos, rating hotels on Google Maps, or reviewing products.',
+    summaryHindi: 'वॉट्सऐप पर घर बैठे 3000-8000 रुपये रोजाना कमाने का ऑफर दिया जाता है। शुरू में कुछ रुपये देकर बाद में लाखों का निवेश कराया जाता है।',
+    modusOperandi: [
+      'Recruiter contacts on WhatsApp with high-paying part-time job offer for students/homemakers.',
+      'Asks you to take 3 screenshots of liking YouTube videos or Google Maps places.',
+      'Immediately pays ₹150 or ₹200 to your UPI to build false trust.',
+      'Adds you to a Telegram "VIP Prepaid Task Group" where members (shills) post screenshots of earning thousands.',
+      'Victim is asked to deposit ₹5,000 to "unlock high commission tasks", then ₹50,000, then ₹2,00,000.',
+      'Withdrawals are frozen and scammer demands 30% "crypto tax" to release funds.',
+    ],
+    redFlags: [
+      'Unsolicited WhatsApp job offers from international country codes (+62, +84, +234, +44).',
+      'Unrealistically high payouts for 1-minute trivial tasks.',
+      'Shifting the conversation to Telegram groups and demanding prepaid money to unlock earnings.',
+    ],
+    goldenRule: 'Legitimate companies NEVER ask job seekers to deposit money or pay fees to work or withdraw salary.',
+    goldenRuleHindi: 'कोई भी वास्तविक कंपनी काम देने के बदले आपसे पैसे जमा करने को नहीं कहती।',
+    safeAction: 'Exit the Telegram group and block the recruiter. Report the UPI ID and phone number to 1930.',
+  },
+  {
+    id: 'remote-access-trap',
+    title: 'Remote Screen-Sharing App Trap (AnyDesk / RustDesk)',
+    titleHindi: 'रिमोट स्क्रीन शेयरिंग ऐप फ्रॉड (AnyDesk / TeamViewer)',
+    category: 'Device Takeover',
+    badge: 'Total Financial Loss',
+    icon: 'monitor',
+    summary: 'Scammers pretending to be customer support for Swiggy, Zomato, airlines, or banks instruct you to install AnyDesk, TeamViewer, or RustDesk to solve an issue.',
+    summaryHindi: 'कस्टमर केयर बनकर ठग आपके फोन में AnyDesk या TeamViewer डलवाते हैं और आपका पूरा फोन व बैंकिंग कंट्रोल कर लेते हैं।',
+    modusOperandi: [
+      'You search for customer care number on Google Maps / web and call a fake number.',
+      'Executive pretends to help with a refund or pending delivery.',
+      'Instructs: "Please download our quick support verification app from Play Store" (names AnyDesk, TeamViewer, QuickSupport, or RustDesk).',
+      'Asks you to read out the 9-digit session code.',
+      'Once connected, they tell you to open your mobile banking or UPI app and enter your PIN while they secretly view the screen and record your credentials.',
+    ],
+    redFlags: [
+      'Any customer care executive asking you to install AnyDesk, RustDesk, or TeamViewer.',
+      'Asking you to share a 9-digit code or grant "Accessibility" permission.',
+      'Asking you to open your banking app while on call.',
+    ],
+    goldenRule: 'Never install remote desktop software on instruction from an unknown caller. Legitimate companies never need access to your phone screen.',
+    goldenRuleHindi: 'किसी भी अज्ञात व्यक्ति के कहने पर अपने फोन में AnyDesk या स्क्रीन शेयरिंग ऐप कभी डाउनलोड न करें।',
+    safeAction: 'Hang up immediately. If already installed, turn on Airplane mode immediately and uninstall the app.',
+  },
+  {
+    id: 'fake-payment-screenshot',
+    title: 'Fake Payment Screenshot (Spoof Apps)',
+    titleHindi: 'फर्जी पेमेंट स्क्रीनशॉट फ्रॉड (Paytm/GPay स्पूफ ऐप)',
+    category: 'Merchant & Seller Fraud',
+    badge: 'Targeting Shopkeepers & OLX Sellers',
+    icon: 'receipt',
+    summary: 'A buyer shows a convincing green checkmark screenshot of Paytm, PhonePe, or Google Pay stating "Payment Successful", but no money actually reflects in your bank account.',
+    summaryHindi: 'खरीदार फोन पर Paytm या GPay का हूबहू फर्जी स्क्रीनशॉट दिखाता है कि पैसे कट गए, लेकिन आपके खाते में पैसे नहीं आते।',
+    modusOperandi: [
+      'Customer or buyer uses a simulator/spoof app (e.g. Paytm Spoof / FakePe).',
+      'Enters seller name, phone number, and transaction amount (e.g. ₹4,500).',
+      'Generates an identical-looking animated success screen with tick mark and UTR number.',
+      'Shows the screen and claims: "Server is slow, SMS will arrive in 15 minutes, please let me take the goods".',
+    ],
+    redFlags: [
+      'No soundbox announcement (Paytm/PhonePe Soundbox) or SMS notification on your own device.',
+      'Bank balance not increased when you check your own UPI app statement.',
+      'Customer in extreme hurry to leave without waiting for your verification.',
+    ],
+    goldenRule: 'Never release goods or transfer money based on a buyer’s screenshot. Only trust money reflected in your own bank balance or voice notification.',
+    goldenRuleHindi: 'केवल ग्राहक के दिखाए स्क्रीनशॉट पर कभी भरोसा न करें। जब तक आपके अपने बैंक खाते में पैसे न दिखें, सामान न दें।',
+    safeAction: 'Insist on waiting until your bank statement or merchant soundbox confirms receipt.',
+  },
+  {
+    id: 'illegal-loan-app',
+    title: 'Illegal 7-Day Instant Loan & Extortion Apps',
+    titleHindi: 'फर्जी 7-दिवसीय लोन ऐप व ब्लैकमेलिंग सिंडिकेट',
+    category: 'Extortion & Data Theft',
+    badge: 'Predatory Threat',
+    icon: 'alert-triangle',
+    summary: 'Apps promising instant loan approval in 2 minutes without CIBIL score. Upon installation, they steal all phone contacts and photos, then blackmail with morphed pictures.',
+    summaryHindi: 'बिना दस्तावेज के 2 मिनट में लोन का लालच देकर फोन के सारे कॉन्टैक्ट और फोटो चुरा लेते हैं और रिश्तेदारों को अश्लील फोटो भेजने की धमकी देकर वसूली करते हैं।',
+    modusOperandi: [
+      'Victim downloads an unverified instant loan app advertised on Instagram/Facebook.',
+      'App requests permission for Contacts, Gallery/Storage, and Camera before proceeding.',
+      'Transfers a small sum (e.g. ₹3,500 for a ₹5,000 loan, deducting hefty processing fee).',
+      'After just 5-7 days, recovery agents start calling family and friends from the stolen contact list.',
+      'Threatens to send morphed vulgar pictures to all relatives unless ₹15,000 is paid.',
+    ],
+    redFlags: [
+      'Offers loan without any credit check or KYC documentation.',
+      'Requests full access to your Contacts list and Photo gallery.',
+      '7-day repayment period with astronomical 500%+ interest rate.',
+      'App not registered with RBI NBFC list.',
+    ],
+    goldenRule: 'Never install loan apps that ask for Contact or Gallery permissions. Check the RBI Sachet portal for verified lenders.',
+    goldenRuleHindi: 'कांटेक्ट या गैलरी परमिशन मांगने वाली किसी भी लोन ऐप को कभी इंस्टॉल न करें। केवल RBI पंजीकृत बैंकों/NBFC से लोन लें।',
+    safeAction: 'File a complaint on cybercrime.gov.in and report to RBI Sachet. Warn family and close contacts not to respond to extortionists.',
+  },
+];

@@ -1,0 +1,6 @@
+{
+  "name": "ScamShield India",
+  "description": "AI-powered scam detection and digital safety assistant for India. Detect phishing messages, fake UPI requests, malicious links, suspicious phone numbers, and fraudulent screenshots.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
